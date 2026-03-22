@@ -1,0 +1,29 @@
+{
+  "video_source": "data/video_sample1.mp4",
+  "detection_skip_frames": 5,
+  "face_min_confidence": 0.5,
+  "similarity_threshold": 0.35,
+  "bytetrack_track_thresh": 0.45,
+  "bytetrack_track_buffer": 60,
+  "bytetrack_match_thresh": 0.7,
+  "log_dir": "logs",
+  "db_path": "data/face_db.sqlite",
+  "dashboard_port": 5000,
+  "enable_dashboard": true,
+  "show_preview": true,
+  "save_output_video": false,
+  "output_video_path": "data/output.avi",
+  "insightface_model": "buffalo_sc",
+  "insightface_provider": "CPUExecutionProvider",
+  "counting_line": {
+    "start": [
+      0,
+      300
+    ],
+    "end": [
+      640,
+      300
+    ],
+    "entry_side": 1
+  }
+}

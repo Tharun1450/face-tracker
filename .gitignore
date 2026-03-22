@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+env/
+
+# Model weights (auto-downloaded, do not commit)
+models/
+*.pt
+*.onnx
+
+# InsightFace model cache
+.insightface/
+
+# Data
+data/sample_video.mp4
+data/output.avi
+data/*.mp4
+data/*.avi
+
+# Logs (optional — include sample logs in submission)
+# logs/
+
+# Database (include the sample DB in submission)
+# data/face_db.sqlite
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

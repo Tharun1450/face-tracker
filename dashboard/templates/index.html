@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Face Tracker Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & tokens ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --border:  #30363d;
+      --accent:  #00ffb2;
+      --accent2: #7c3aed;
+      --text:    #e6edf3;
+      --muted:   #8b949e;
+      --entry-c: #22c55e;
+      --exit-c:  #f87171;
+      --radius:  12px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header svg { width: 36px; height: 36px; flex-shrink: 0; }
+    header h1 { font-size: 1.4rem; font-weight: 700; }
+    header span { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+    .live-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 1.6s ease-in-out infinite;
+      margin-left: auto;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    /* ── Main layout ── */
+    main {
+      flex: 1;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    /* ── Visitor counter card ── */
+    .counter-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 12px;
+      min-height: 200px;
+    }
+    .counter-card .label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .counter-value {
+      font-size: 5rem;
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: transform 0.2s ease;
+    }
+    .counter-value.bump { transform: scale(1.15); }
+
+    /* ── Sidebar stats ── */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row .key { color: var(--muted); }
+    .stat-row .val { font-weight: 600; }
+
+    /* ── Events table ── */
+    .events-card { grid-column: 1 / -1; }
+    .events-card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th {
+      text-align: left;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.75rem;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-entry { background: rgba(34,197,94,0.15); color: var(--entry-c); }
+    .badge-exit  { background: rgba(248,113,113,0.15); color: var(--exit-c); }
+    .face-id     { font-family: monospace; color: var(--muted); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 16px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ── Refresh button ── */
+    .btn-refresh {
+      background: var(--accent2);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+      margin-left: auto;
+      display: block;
+      margin-bottom: 12px;
+      transition: opacity 0.15s;
+    }
+    .btn-refresh:hover { opacity: 0.85; }
+
+    @media (max-width: 700px) {
+      main { grid-template-columns: 1fr; }
+      .events-card { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="18" cy="18" r="17" stroke="#00ffb2" stroke-width="2"/>
+    <circle cx="18" cy="14" r="5" fill="#00ffb2" opacity="0.9"/>
+    <path d="M9 28c0-4.97 4.03-9 9-9s9 4.03 9 9" stroke="#00ffb2" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <div>
+    <h1>Face Tracker Dashboard</h1>
+    <span>Real-time visitor intelligence</span>
+  </div>
+  <div class="live-dot" title="Live data"></div>
+</header>
+
+<!-- Main -->
+<main>
+
+  <!-- Sidebar: counter + stats -->
+  <div style="display:flex;flex-direction:column;gap:20px;">
+
+    <div class="card counter-card">
+      <div class="label">Unique Visitors</div>
+      <div class="counter-value" id="counter">—</div>
+      <div style="font-size:0.78rem;color:var(--muted);">detected this session</div>
+    </div>
+
+    <div class="card">
+      <div class="stat-row">
+        <span class="key">Total Events</span>
+        <span class="val" id="stat-total">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="key">Entries</span>
+        <span class="val" id="stat-entries" style="color:var(--entry-c)">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="key">Exits</span>
+        <span class="val" id="stat-exits" style="color:var(--exit-c)">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="key">Last Updated</span>
+        <span class="val" id="stat-time">—</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Events table -->
+  <div class="card events-card">
+    <h2>Recent Events</h2>
+    <button class="btn-refresh" onclick="loadEvents()">⟳ Refresh</button>
+    <table id="events-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Type</th>
+          <th>Face ID</th>
+          <th>Timestamp</th>
+          <th>Image</th>
+        </tr>
+      </thead>
+      <tbody id="events-body">
+        <tr><td colspan="5" style="color:var(--muted);text-align:center;padding:24px;">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer>
+  Face Tracker &mdash; Powered by YOLOv8 + InsightFace + ByteTrack &nbsp;|&nbsp;
+  <a href="https://katomaran.com" target="_blank">katomaran.com</a>
+</footer>
+
+<script>
+  // ── Live counter via SSE ──
+  const counterEl = document.getElementById('counter');
+  let prevCount = null;
+
+  const sse = new EventSource('/api/stream');
+  sse.onmessage = (e) => {
+    const count = parseInt(e.data, 10);
+    counterEl.textContent = count;
+    if (prevCount !== null && count !== prevCount) {
+      counterEl.classList.add('bump');
+      setTimeout(() => counterEl.classList.remove('bump'), 300);
+    }
+    prevCount = count;
+  };
+  sse.onerror = () => {
+    counterEl.textContent = 'N/A';
+  };
+
+  // ── Events table ──
+  async function loadEvents() {
+    try {
+      const res = await fetch('/api/events');
+      const events = await res.json();
+      const tbody = document.getElementById('events-body');
+      tbody.innerHTML = '';
+
+      let entries = 0, exits = 0;
+
+      if (events.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:24px;">No events yet.</td></tr>';
+      } else {
+        events.forEach(ev => {
+          if (ev.event_type === 'entry') entries++;
+          else exits++;
+
+          const tr = document.createElement('tr');
+          const badgeClass = ev.event_type === 'entry' ? 'badge-entry' : 'badge-exit';
+          const shortId = ev.face_id.substring(0, 8) + '…';
+          const imgCell = ev.image_path
+            ? `<a href="#" title="${ev.image_path}" style="color:var(--accent);font-size:0.78rem;">🖼 view</a>`
+            : '<span style="color:var(--muted)">—</span>';
+
+          tr.innerHTML = `
+            <td style="color:var(--muted)">${ev.event_id}</td>
+            <td><span class="badge ${badgeClass}">${ev.event_type}</span></td>
+            <td class="face-id" title="${ev.face_id}">${shortId}</td>
+            <td>${ev.timestamp.replace('T', ' ').substring(0, 19)}</td>
+            <td>${imgCell}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('stat-total').textContent = events.length;
+      document.getElementById('stat-entries').textContent = entries;
+      document.getElementById('stat-exits').textContent = exits;
+      document.getElementById('stat-time').textContent = new Date().toLocaleTimeString();
+    } catch (err) {
+      console.error('Failed to load events:', err);
+    }
+  }
+
+  // Auto-refresh every 5 seconds
+  loadEvents();
+  setInterval(loadEvents, 5000);
+</script>
+</body>
+</html>
