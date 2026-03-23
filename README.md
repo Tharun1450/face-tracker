@@ -300,8 +300,6 @@ face_tracker/
 
 ---
 
-> **Demo video**: *(Add your Loom / YouTube link here before submission)*
+> **Demo video** https://www.youtube.com/watch?v=m57ooCX497I
 
----
-
-*This project is a part of a hackathon run by [https://katomaran.com](https://katomaran.com)*
+*
